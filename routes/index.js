@@ -40,20 +40,24 @@ const mailTask = function () {
             conf.AUTH_PWD
         }
     }
+    // fileList赋值
+    const setFileList = (value) =>{
+        return fileList = value
+    }
     // 创建html图片内容模板
     const createHtmlTemplate = (i, html) => {
         html += '<img src="cid:0000000' + i + '"/>'
         return html
     }
     // 创建附件列表
-    const createAttachmentList = (i, filelist) => {
+    const createAttachmentList = (i, filelist, path) => {
         let item = {
             filename: '',
             path: '',
             cid: ''
         }
         item.filename = filelist[i - 1]
-        item.path = 'public/images/' + filelist[i - 1]
+        item.path = path + filelist[i - 1]
         item.cid = '0000000' + i
         return item
     }
@@ -62,84 +66,60 @@ const mailTask = function () {
         nodemailer.createTransport(hostOptions)
     }
     // 文件目录读取
-    const readdir = (path) =>{
-        fs.readdir(path,function (err, files) {
-            if (err) console.log(err)
-            return files
+    const readdir = (path) => {
+        return new Promise(function (resolve, reject) {
+            fs.readdir(path, function (err, files) {
+                if (err) reject(err)
+                resolve(files)
+            })
         })
     }
     // 遍历生成
     const insertImage = (arr) => {
         let i = 0
-        while (arr[i]){
-           i++
-            options.html = createHtmlTemplate(i,htmlTemplate)
-            options.attachments.push(createAttachmentList(i,fileList))
+        while (arr[i]) {
+            i++
+            options.html = createHtmlTemplate(i, htmlTemplate)
+            options.attachments.push(createAttachmentList(i, fileList, 'public/images/'))
         }
     }
     // 暂存html模板
-    const saveTemplate = () =>{
+    const saveTemplate = () => {
         templateSaved = options.html
         htmlTemplate = options.html
     }
     // 发送邮件
     const sendMail = () => {
-       mailTransport.sendMail(options,function (err,msg) {
-           if (err) {
-               console.log(err);
-           }
-           else {
-               console.log(msg);
-           }
-           options.attachments = []
-           options.html = templateSaved
-       })
+        return new Promise(function (resolve, reject) {
+            mailTransport.sendMail(options, function (err, msg) {
+                if (err) {
+                    console.log(err);
+                    reject()
+                }
+                else {
+                    console.log(msg);
+                }
+                options.attachments = []
+                options.html = templateSaved
+                resolve()
+            })
+        })
     }
-    return {
-    //   创建定时发送任务
-        createMailTask: (rule) =>{
-            schedule.scheduleJob(rule,function () {
+    return (rule) => {
+            schedule.scheduleJob(rule, function () {
                 saveTemplate()
-
+                mailTransport()
+                readdir('public/images/')
+                    .then(setFileList(value))
+                    .then(insertImage(fileList))
+                    .then(sendMail())
+                    .then(console.log('邮件发送成功'))
             })
         }
-    }
-}
-
-// 附件初始化
-const initFileList = function (oriHtml) {
-    let testHtml = oriHtml
-    // 读取 ./public/images 下的图片文件列表
-    fs.readdir('./public/images', function (err, files) {
-        if (err) console.log(err)
-        fileList = files
-        // 生成邮件正文字符串模板及附件列表
-        let i = 0
-        while (fileList[i]) {
-            i++
-            options.html = createHtmlTemplate(i, testHtml)
-            options.attachments.push(createAttachmentList(i, fileList))
-        }
-        //发送邮件
-        mailTransport.sendMail(options, function (err, msg) {
-            if (err) {
-                console.log(err);
-            }
-            else {
-                console.log(msg);
-            }
-            options.attachments = []
-            options.html = oriHtml
-        })
-    })
 }
 
 // 创建定时发送任务
-let sendTask = schedule.scheduleJob(rule, function () {
-    let optHtml = options.html
-    initFileList(optHtml)
-    console.log('邮件已发送');
-})
+mailTask(rule)
 
 /* GET home page. */
 // 配置页预留
