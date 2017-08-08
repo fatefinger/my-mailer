@@ -4,7 +4,8 @@ const schedule = require('node-schedule')
 const nodemailer = require('nodemailer')
 const conf = require('../conf/conf')
 
-const mailClass = function () {
+const MailClass = function (my) {
+    this.my = my || {}
     // 邮件主机配置
     const hostOptions = {
         host: conf.SMTP_HOST,
@@ -17,7 +18,7 @@ const mailClass = function () {
         }
     }
     // 获取主机配置
-    const getHostOptions = ()=>{
+    const getHostOptions = () => {
         return hostOptions
     }
     // 邮件传输初始化
@@ -49,12 +50,12 @@ const mailClass = function () {
         html: '<h1>你好，这是一封来自my-mailer的邮件！</h1>',
         attachments: []
     }
-     // get Options
-    const getOptions = () =>{
+    // get Options
+    const getOptions = () => {
         return options
     }
     // get options.html
-    const getOptionsHtml = () =>{
+    const getOptionsHtml = () => {
         return options.html
     }
     // set options.html
@@ -66,7 +67,7 @@ const mailClass = function () {
         return options.attachments.push(item)
     }
     // setOptionsAttachments
-    const setOptionsAttachments = (value) =>{
+    const setOptionsAttachments = (value) => {
         return options.attachments = value
     }
 
@@ -95,7 +96,7 @@ const mailClass = function () {
             })
         })
     }
-    // 遍历生成
+    // 插入附件
     const insertImage = (arr) => {
         let i = 0
         while (arr[i]) {
@@ -135,10 +136,12 @@ const mailClass = function () {
                     .then(() => sendMail())
                     .then(() => {
                         console.log('邮件发送成功')
+                    }, () => {
+                        console.log('邮件发送失败')
                     })
             })
         }
     }
 }
 
-module.exports = mailClass
+module.exports = new MailClass()

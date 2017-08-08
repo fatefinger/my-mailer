@@ -4,8 +4,7 @@ const router = express.Router()
 const mail = require('../service/mail')
 
 // 创建定时发送任务
-let task = new mail()
-task.timingSend()
+mail.timingSend()
 /* GET home page. */
 // 配置页预留
 router.get('/', function (req, res, next) {
