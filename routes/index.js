@@ -12,6 +12,18 @@ rule.second = conf.SECOND_TO_SEND //测试用
 
 // 邮件任务模块
 const mailTask = function () {
+    // 邮件主机配置
+    const hostOptions = {
+        host: conf.SMTP_HOST,
+        secureConnection:
+        conf.SSL_STATE, // use SSL
+        auth: {
+            user: conf.AUTH_USER,
+            pass:
+            conf.AUTH_PWD
+        }
+    }
+    let mailTransport = nodemailer.createTransport(hostOptions)
     // 图片附件列表
     let fileList = []
     // 模板
@@ -29,25 +41,16 @@ const mailTask = function () {
         html: '<h1>你好，这是一封来自NodeMailer的邮件！</h1>',
         attachments: []
     }
-    // 邮件主机配置
-    const hostOptions = {
-        host: conf.SMTP_HOST,
-        secureConnection:
-        conf.SSL_STATE, // use SSL
-        auth: {
-            user: conf.AUTH_USER,
-            pass:
-            conf.AUTH_PWD
-        }
-    }
     // fileList赋值
-    const setFileList = (value) =>{
-        return fileList = value
+    const setFileList = (value) => {
+        return new Promise((resolve, reject) => {
+            fileList = value
+            resolve(fileList)
+        })
     }
     // 创建html图片内容模板
-    const createHtmlTemplate = (i, html) => {
-        html += '<img src="cid:0000000' + i + '"/>'
-        return html
+    const createHtmlTemplate = (i) => {
+        return '<img src="cid:0000000' + i + '"/>'
     }
     // 创建附件列表
     const createAttachmentList = (i, filelist, path) => {
@@ -60,10 +63,6 @@ const mailTask = function () {
         item.path = path + filelist[i - 1]
         item.cid = '0000000' + i
         return item
-    }
-    // 创建邮件传输
-    const mailTransport = (hostOptions) => {
-        nodemailer.createTransport(hostOptions)
     }
     // 文件目录读取
     const readdir = (path) => {
@@ -79,7 +78,7 @@ const mailTask = function () {
         let i = 0
         while (arr[i]) {
             i++
-            options.html = createHtmlTemplate(i, htmlTemplate)
+            options.html += createHtmlTemplate(i)
             options.attachments.push(createAttachmentList(i, fileList, 'public/images/'))
         }
     }
@@ -90,37 +89,36 @@ const mailTask = function () {
     }
     // 发送邮件
     const sendMail = () => {
-        return new Promise(function (resolve, reject) {
             mailTransport.sendMail(options, function (err, msg) {
                 if (err) {
                     console.log(err);
-                    reject()
                 }
                 else {
                     console.log(msg);
+                    options.attachments = []
+                    options.html = templateSaved
                 }
-                options.attachments = []
-                options.html = templateSaved
-                resolve()
             })
-        })
     }
-    return (rule) => {
+    return {
+        sendTask: (rule) => {
             schedule.scheduleJob(rule, function () {
                 saveTemplate()
-                mailTransport()
-                readdir('public/images/')
-                    .then(setFileList(value))
-                    .then(insertImage(fileList))
-                    .then(sendMail())
-                    .then(console.log('邮件发送成功'))
+                readdir(conf.IMAGE_PATH)
+                    .then(_ => setFileList(_))
+                    .then(_ => insertImage(_))
+                    .then(()=>sendMail())
+                    .then(() => {
+                        console.log('邮件发送成功')
+                    })
             })
         }
+    }
 }
 
 // 创建定时发送任务
-mailTask(rule)
-
+let task = new mailTask()
+task.sendTask(rule)
 /* GET home page. */
 // 配置页预留
 router.get('/', function (req, res, next) {
