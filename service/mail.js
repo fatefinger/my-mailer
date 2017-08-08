@@ -31,7 +31,7 @@ const mailClass = function () {
         // bcc		: ''	//密送
         subject: conf.MAIL_SUBJECT,
         text: conf.MAIL_TEXT,
-        html: '<h1>你好，这是一封来自NodeMailer的邮件！</h1>',
+        html: '<h1>你好，这是一封来自my-mailer的邮件！</h1>',
         attachments: []
     }
     // fileList赋值
@@ -97,8 +97,7 @@ const mailClass = function () {
     return {
         timingSend: () => {
             const rule = new schedule.RecurrenceRule()
-            rule.second = conf.SECOND_TO_SEND //测试用
-            // rule.hour = conf.HOUR_TO_SEND //正式用
+            conf.MODE === 'test'?(rule.second = conf.SECOND_TO_SEND):(rule.hour = conf.HOUR_TO_SEND)
             schedule.scheduleJob(rule, function () {
                 saveTemplate()
                 readdir(conf.IMAGE_PATH)

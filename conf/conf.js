@@ -13,6 +13,7 @@ const cc = '' // 邮件抄送对象
 const subject = '一封测试用的邮件' // 邮件标题
 const text = '一封测试用的邮件aaa' // 邮件正文
 const path = 'public/images/' // 图片目录相对路径
+const test = 'test' //是否为测试模式
 module.exports = {
     SECOND_TO_SEND: sendSec,
     HOUR_TO_SEND: sendHour,
@@ -25,5 +26,6 @@ module.exports = {
     MAIL_CC: cc,
     MAIL_SUBJECT: subject,
     MAIL_TEXT: text,
-    IMAGE_PATH: path
+    IMAGE_PATH: path,
+    MODE: test
 }

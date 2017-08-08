@@ -20,4 +20,4 @@
 
 # 测试
 
- routes/index.js 将rule.second取消注释，将rule.hour注释掉，运行后即为每分钟的第20秒发送邮件
+conf/conf.js 中MODE = 'test'时为测试模式
