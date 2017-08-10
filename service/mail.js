@@ -1,11 +1,22 @@
+'use strict'
+
 const fs = require('fs')
 const path = require('path')
 const schedule = require('node-schedule')
 const nodemailer = require('nodemailer')
 const conf = require('../conf/conf')
 
-const MailClass = function (my) {
-    this.my = my || {}
+const MailClass = function (options) {
+    this.options = Object.assign({
+        from: conf.MAIL_FROM,
+        to: conf.MAIL_TO,
+        cc: conf.MAIL_CC,
+        // bcc		: ''	//密送
+        subject: conf.MAIL_SUBJECT,
+        text: conf.MAIL_TEXT,
+        html: '<h1>你好，这是一封来自my-mailer的邮件！</h1>',
+        attachments: []
+    }, options)
     // 邮件主机配置
     const hostOptions = {
         host: conf.SMTP_HOST,
@@ -34,41 +45,29 @@ const MailClass = function (my) {
         })
     }
 
-    // 模板
-    let htmlTemplate = ''
     // 模板存档
     let templateSaved = ''
 
     // 邮件内容选项
-    const options = {
-        from: conf.MAIL_FROM,
-        to: conf.MAIL_TO,
-        cc: conf.MAIL_CC,
-        // bcc		: ''	//密送
-        subject: conf.MAIL_SUBJECT,
-        text: conf.MAIL_TEXT,
-        html: '<h1>你好，这是一封来自my-mailer的邮件！</h1>',
-        attachments: []
-    }
     // get Options
     const getOptions = () => {
-        return options
+        return this.options
     }
     // get options.html
     const getOptionsHtml = () => {
-        return options.html
+        return this.options.html
     }
     // set options.html
     const setOptionsHtml = (value) => {
-        return options.html += value
+        return this.options.html += value
     }
     // push item options.attachments
     const pushOptionsAttachments = (item) => {
-        return options.attachments.push(item)
+        return this.options.attachments.push(item)
     }
     // setOptionsAttachments
     const setOptionsAttachments = (value) => {
-        return options.attachments = value
+        return this.options.attachments = value
     }
 
     // 创建html图片内容模板
@@ -108,7 +107,6 @@ const MailClass = function (my) {
     // 暂存html模板
     const saveTemplate = () => {
         templateSaved = getOptionsHtml()
-        htmlTemplate = getOptionsHtml()
     }
     // 发送邮件
     const sendMail = () => {
@@ -125,7 +123,7 @@ const MailClass = function (my) {
         })
     }
     return {
-        timingSend: () => {
+        send: () => {
             const rule = new schedule.RecurrenceRule()
             conf.MODE === 'test' ? (rule.second = conf.SECOND_TO_SEND) : (rule.hour = conf.HOUR_TO_SEND)
             schedule.scheduleJob(rule, function () {
@@ -136,12 +134,12 @@ const MailClass = function (my) {
                     .then(() => sendMail())
                     .then(() => {
                         console.log('邮件发送成功')
-                    }, () => {
-                        console.log('邮件发送失败')
+                    }, (err) => {
+                        console.log('邮件发送失败' + err)
                     })
             })
         }
     }
 }
 
-module.exports = new MailClass()
+module.exports = MailClass
