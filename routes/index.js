@@ -11,7 +11,7 @@ mailTask01.send()
 /* GET home page. */
 // 配置页预留
 router.get('/', function (req, res, next) {
-    res.sendfile('views\\index.html')
+    res.sendfile('public\\index.html')
 })
 
 router.post('/task', function (req, res, next) {
