@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const schedule = require('node-schedule')
 const nodemailer = require('nodemailer')
-const conf = require('../conf/conf')
+const conf = require('../../conf/conf')
 
 const MailClass = function (options) {
     this.options = Object.assign({

@@ -1,12 +1,11 @@
 const express = require('express')
 const path = require('path')
 const router = express.Router()
-const mail = require('../service/mail')
+const mail = require('../service/mail/mail')
 const conf = require('../conf/conf')
+const multer = require('multer')
 
-const mailTask01 = new mail({ to: '"杨帆" <532357944@qq.com>'})
-console.log(mailTask01.options)
-mailTask01.send()
+const upload = multer({dest: 'upload/'});
 
 /* GET home page. */
 // 配置页预留
@@ -20,8 +19,25 @@ router.post('/task', function (req, res, next) {
     task.send()
 })
 
-router.get('/list',function (req, res, next) {
+router.get('/list', function (req, res, next) {
 
+})
+
+router.post('/upload', upload.single('file'), function (req, res, next) {
+    let file = req.file;
+
+    console.log('文件类型：%s', file.mimetype);
+    console.log('原始文件名：%s', file.originalname);
+    console.log('文件大小：%s', file.size);
+    console.log('文件保存路径：%s', file.path);
+
+    res.send({
+        state: 'success',
+        type: file.mimetype,
+        name: file.originalname,
+        path: file.path,
+        size: file.size
+    })
 })
 
 module.exports = router;
