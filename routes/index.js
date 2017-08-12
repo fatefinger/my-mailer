@@ -4,6 +4,7 @@ const router = express.Router()
 const mail = require('../service/mail/mail')
 const conf = require('../conf/conf')
 const multer = require('multer')
+const format = require('../utils/format')
 
 const upload = multer({dest: 'upload/'});
 
@@ -13,13 +14,24 @@ router.get('/', function (req, res, next) {
     res.sendfile('public\\index.html')
 })
 
-router.post('/task', function (req, res, next) {
-    let data = req.body.options
-    const task = new mail(data)
-    task.send()
+router.post('/mail', function (req, res, next) {
+    let data = req.body
+    format.formatOption(data)
+        .then((_) => {
+            let task = new mail(_)
+            task.send()
+        })
+        .then(
+            () => res.send(200)
+        )
+        .catch((err) => {
+                res.send(500)
+                console.log(err)
+            }
+        )
 })
 
-router.get('/list', function (req, res, next) {
+router.get('/mail', function (req, res, next) {
 
 })
 

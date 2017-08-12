@@ -12,7 +12,7 @@ const mailTo = '"杨帆" <15601752941@163.com>' // 邮件收件人（多个收�
 const cc = '' // 邮件抄送对象
 const subject = '一封测试用的邮件' // 邮件标题
 const text = '一封测试用的邮件aaa' // 邮件正文
-const path = 'public/images/' // 图片目录相对路径
+const path = 'upload/' // 图片目录相对路径
 const test = 'test' //是否为测试模式
 module.exports = {
     SECOND_TO_SEND: sendSec,
