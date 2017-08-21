@@ -1,3 +1,9 @@
+/**
+ * Mail Class
+ * @date 2017-08-21
+ * @author yangfan<yangfan@kedacom.com>
+ */
+
 'use strict'
 
 const fs = require('fs')
@@ -5,95 +11,65 @@ const path = require('path')
 const schedule = require('node-schedule')
 const nodemailer = require('nodemailer')
 const conf = require('../../conf/conf')
+const Mailer = require('./mailer')
+const Auth = require('./auth')
+/**
+ *
+ * @param {Object} mailer
+ * @param {Object} auth
+ * @param {Array} attachments
+ * @returns {{sendAll: (function()), send: (function())}}
+ * @constructor create a new Mail instance
+ */
+const MailClass = function (mailer, auth, attachments) {
+    this.options = Object.assign({},{
+        from: conf.MAIL_FROM,
+        to: conf.MAIL_TO,
+        cc: '',
+        // bcc		: ''	//密送
+        subject: '',
+        text: '',
+        html: '<h1>你好，这是一封来自my-mailer的邮件！</h1>',
+        attachments: []
+    },mailer)
 
-const MailClass = function (option) {
-    this.options = {
-        mailOptions: {
-            from: conf.MAIL_FROM,
-            to: '',
-            cc: conf.MAIL_CC,
-            // bcc		: ''	//密送
-            subject: conf.MAIL_SUBJECT,
-            text: conf.MAIL_TEXT,
-            html: '<h1>你好，这是一封来自my-mailer的邮件！</h1>',
-            attachments: []
-        },
-        attachments:[]
-    }
-    this.options.mailOptions = Object.assign({}, this.options.mailOptions,option.mailOptions)
-    this.options.attachments = Object.assign({}, this.options.attachments,option.attachments)
-
-    // 邮件主机配置
-    const hostOptions = {
+    this.authOptions = Object.assign({},{
         host: conf.SMTP_HOST,
-        secureConnection:
-        conf.SSL_STATE, // use SSL
+        secureConnection: conf.SSL_STATE, // use SSL
         auth: {
             user: conf.AUTH_USER,
             pass: conf.AUTH_PWD
-        }
-    }
-    // 获取主机配置
-    const getHostOptions = () => {
-        return hostOptions
-    }
-    // 邮件传输初始化
-    const mailTransport = nodemailer.createTransport(getHostOptions())
+        }},auth)
+    this.attachments = attachments || []
 
     // 图片附件列表
-    let fileList = []
+    this.fileList = []
+
+    Mailer.init(this.options)
+
+    Auth.init(this.authOptions)
+
+    // 邮件传输初始化
+    this.mailTransport = nodemailer.createTransport(Auth.hostOptions())
+
     // set fileList
-    const setFileList = (value) => {
-        console.log('setFileList is beginning')
+    this.setFileList = (value) => {
         return new Promise((resolve, reject) => {
-            fileList = value
-            console.log('setFileList is ending')
-            resolve(fileList)
+            this.fileList = value
+            resolve(this.fileList)
         })
     }
 
     // 模板存档
-    let templateSaved = ''
+    this.templateSaved = ''
 
-    // 邮件内容选项
-    // get Options
-    const getOptions = () => {
-        console.log(this.options.mailOptions)
-        return this.options.mailOptions
-    }
-    // get options.html
-    const getOptionsHtml = () => {
-        return this.options.mailOptions.html
-    }
-    // set options.html
-    const setOptionsHtml = (value) => {
-        return this.options.mailOptions.html += value
-    }
-    // init options.html
-    const initOptionsHtml = (value) => {
-        return this.options.mailOptions.html = value
-    }
-
-    // push item options.attachments
-    const pushOptionsAttachments = (item) => {
-        return this.options.mailOptions.attachments.push(item)
-    }
-    // setOptionsAttachments
-    const setOptionsAttachments = (value) => {
-        return this.options.mailOptions.attachments = value
-    }
-    // get Attachments
-    const getAttachments = () => {
-        return new Promise((resolve,reject) =>{
-            resolve(this.options.attachments)
-        })
-    }
     // 创建html图片内容模板
-    const createHtmlTemplate = (i) => {
+    this.createHtmlTemplate = (i) => {
         return '<img src="cid:0000000' + i + '"/>'
     }
+
     // 创建附件列表
-    const createAttachmentList = (i, filelist, path) => {
+    this.createAttachmentList = (i, filelist, path) => {
         let item = {
             filename: '',
             path: '',
@@ -104,89 +80,67 @@ const MailClass = function (option) {
         item.cid = '0000000' + i
         return item
     }
-    // 文件目录读取
-    const readdir = (path) => {
-        return new Promise(function (resolve, reject) {
-            fs.readdir(path, function (err, files) {
-                if (err) reject(err)
-                resolve(files)
-            })
-        })
-    }
 
     // 插入附件
-    const insertImage = (arr) => {
-        console.log('insertImage is beginning')
+    this.insertImage = (arr) => {
         let i = 0
         while (arr[i]) {
             i++
-            setOptionsHtml(createHtmlTemplate(i))
-            pushOptionsAttachments(createAttachmentList(i, fileList, conf.IMAGE_PATH))
+            Mailer.superHtml(this.createHtmlTemplate(i))
+            Mailer.pushAttachment(this.createAttachmentList(i, this.fileList, conf.IMAGE_PATH))
         }
-        console.log('insertImage is ending')
     }
+
     // 暂存html模板
-    const saveTemplate = () => {
-        templateSaved = getOptionsHtml()
+    this.saveTemplate = () => {
+        return new Promise((resolve,reject) => {
+            this.templateSaved = Mailer.html()
+            resolve()
+        })
     }
+
     // 发送邮件
-    const sendMail = () => {
-        console.log('sendMail is beginning')
-        mailTransport.sendMail(getOptions(), function (err, msg) {
+    this.sendMail = () => {
+        this.mailTransport.sendMail(Mailer.option(), function (err, msg) {
             if (err) {
-                console.log('sendMail is err')
-                console.log(getOptions())
                 console.log(err)
             }
             else {
                 console.log(msg)
-                console.log('sendMail is msg')
                 //邮件内容与附件列表还原
             }
         })
     }
+
     // 还原
-    const initForm = () => {
-        setOptionsAttachments([])
-        initOptionsHtml(templateSaved)
+    this.initForm = () => {
+        Mailer.initAttachment()
+        Mailer.initHtml(this.templateSaved)
         console.log(this.options)
     }
-    return {
-        sendAll: () => {
-            const rule = new schedule.RecurrenceRule()
-            conf.MODE === 'test' ? (rule.second = conf.SECOND_TO_SEND) : (rule.hour = conf.HOUR_TO_SEND)
-            schedule.scheduleJob(rule, function () {
-                saveTemplate()
-                readdir(conf.IMAGE_PATH)
-                    .then(_ => setFileList(_))
-                    .then(_ => insertImage(_))
-                    .then(() => sendMail())
-                    .then(() => initForm())
-                    .then(() => {
-                        console.log('邮件发送成功')
-                    }, (err) => {
-                        console.log('邮件发送失败' + err)
-                    })
-            })
-        },
-        send: () =>{
-            const rule = new schedule.RecurrenceRule()
-            conf.MODE === 'test' ? (rule.second = conf.SECOND_TO_SEND) : (rule.hour = conf.HOUR_TO_SEND)
-            schedule.scheduleJob(rule,() =>{
-                saveTemplate()
-                getAttachments()
-                    .then(_ => setFileList(_))
-                    .then(_ => insertImage(_))
-                    .then(() => sendMail())
-                    .then(() => initForm())
-                    .then(() => {
-                        console.log('邮件发送成功')
-                    }, (err) => {
-                        console.log('邮件发送失败' + err)
-                    })
-            })
-        }
-    }
 }
+/**
+ * mail send
+ * this method set a new instance for send mail
+ * @public
+ */
+MailClass.prototype.send = function () {
+        const rule = new schedule.RecurrenceRule()
+        conf.MODE === 'test' ? (rule.second = conf.SECOND_TO_SEND) : (rule.hour = conf.HOUR_TO_SEND)
+        schedule.scheduleJob(rule,() =>{
+            this.saveTemplate()
+                .then(() => Mailer.attachments())
+                .then(_ => this.setFileList(_))
+                .then(_ => this.insertImage(_))
+                .then(() => this.sendMail())
+                .then(() => this.initForm())
+                .then(() => {
+                    console.log('邮件发送成功')
+                }, (err) => {
+                    console.log('邮件发送失败' + err)
+                })
+        })
+}
+
 
 module.exports = MailClass
