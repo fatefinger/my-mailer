@@ -18,7 +18,9 @@ router.post('/mail', function (req, res, next) {
     let data = req.body
     format.formatOption(data)
         .then((_) => {
-            let task = new mail(_)
+            let option = _.mailOptions
+            let attachments = _.attachments
+            let task = new mail(option,attachments)
             task.send()
         })
         .then(
@@ -37,12 +39,10 @@ router.get('/mail', function (req, res, next) {
 
 router.post('/upload', upload.single('file'), function (req, res, next) {
     let file = req.file;
-
     console.log('文件类型：%s', file.mimetype);
     console.log('原始文件名：%s', file.originalname);
     console.log('文件大小：%s', file.size);
     console.log('文件保存路径：%s', file.path);
-
     res.send({
         state: 'success',
         type: file.mimetype,

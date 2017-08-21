@@ -4,8 +4,8 @@
  * @author yangfan<yangfan@kedacom.com>
  */
 'use strict'
-const Auth = function () {
-    this.hostOptions = {
+const AuthClass = function () {
+    this.hostOption = {
         host: '',
         secureConnection: false, // use SSL
         auth: {
@@ -19,29 +19,29 @@ const Auth = function () {
  * @param obj
  * @returns {*}
  */
-Auth.prototype.init = function (obj) {
-    return Object.assign(this.hostOptions,obj)
-}.bind(this)
+AuthClass.prototype.init = function (obj) {
+    return this.hostOption = Object.assign({},this.hostOption,obj)
+}
 /**
  * get Auth.hostOptions
  * @returns {Auth.hostOptions|*}
  */
-Auth.prototype.hostOptions = function () {
-    return this.hostOptions
-}.bind(this)
+AuthClass.prototype.hostOptions = function () {
+    return this.hostOption
+}
 /**
  * set Auth item on value
  * @param item
  * @param value
  * @returns {boolean}
  */
-Auth.prototype.setHostOptions = function (item, value) {
-    if (this.hostOptions[item]){
-        this.hostOptions[item] = value
+AuthClass.prototype.setHostOptions = function (item, value) {
+    if (this.hostOption[item]){
+        this.hostOption[item] = value
         return true
     } else {
         return false
     }
-}.bind(this)
+}
 
-module.exports = new Auth()
+module.exports = new AuthClass()

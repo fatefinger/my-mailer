@@ -5,8 +5,8 @@
  */
 'use strict'
 
-const Mailer = function (obj) {
-    this.option = Object.assign({
+const MailerClass = function (obj) {
+    this.options = Object.assign({
         from: '',
         to: '',
         cc: '',
@@ -15,79 +15,79 @@ const Mailer = function (obj) {
         text: '',
         html: '<h1>你好，这是一封来自my-mailer的邮件！</h1>',
         attachments: []
-    },obj)
-}
-/**
- * init Mailer.option
- * @params {Object}
- * @returns {Object}
- */
-Mailer.prototype.init = function (obj) {
-    return Object.assign(this.options,obj)
+    }, obj)
 }
 /**
  * get Mailer.option
  * @returns {Object}
  * @public
  */
-Mailer.prototype.option = function () {
-    return this.option
-}.bind(this)
+MailerClass.prototype.option = () => {
+    return this.options
+}
+/**
+ * init Mailer.option
+ * @params {Object}
+ * @returns {Object}
+ */
+MailerClass.prototype.init = (obj) => {
+    return this.options = Object.assign({},this.options, obj)
+}
 /**
  * get Mailer.option.html
  * @returns {String}
  * @public
  */
-Mailer.prototype.html = function () {
-    return this.html
-}.bind(this.option())
+MailerClass.prototype.html = () => {
+    return this.options.html
+}
 /**
  * get Mailer.option.attachments
  * @public
  * @returns {Array}
  */
-Mailer.prototype.attachments = function () {
-    return this.attachments
-}.bind(this.option())
+MailerClass.prototype.attachments = () => {
+    return this.options.attachments
+}
 /**
  * Accumulate on html
- * @param {String}
+ * @param {String} value
  * @public
  * @returns {String}
  */
-Mailer.prototype.superHtml = function (value) {
-    return this.html += value
-}.bind(this.option())
+MailerClass.prototype.superHtml = (value) => {
+    return this.options.html += value
+}
 /**
  * This method init Mailer.option.html
  * @public
  */
-Mailer.prototype.initHtml = function (value) {
-    return this.html = value
-}.bind(this.option())
+MailerClass.prototype.initHtml = (value) => {
+    return this.options.html = value
+}
 /**
  * This method push item to Mailer.option.attachments
- * @param {Object}
+ * @param {Object} item
  * @public
  */
-Mailer.prototype.pushAttachment = function (item) {
-    return this.attachments().push(item)
-}.bind(this)
+MailerClass.prototype.pushAttachment = (item) => {
+    return this.options.attachments.push(item)
+}
 /**
  * This method init Mailer.option.attachment
  * @public
  */
-Mailer.prototype.initAttachment = function () {
-    return this.attachments = []
-}.bind(this.option())
+MailerClass.prototype.initAttachment = () => {
+    return this.options.attachments = []
+}
 /**
  * set this.attachments on value
  * @param {Array} value
  * @returns {Array} this.attachments
  * @public
  */
-Mailer.prototype.setAttachment = function (value) {
-    return this.attachments = value
-}.bind(this.option())
+MailerClass.prototype.setAttachment = (value) => {
+    return this.options.attachments = value
+}
 
-module.exports = new Mailer()
+module.exports = new MailerClass()
