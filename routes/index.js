@@ -5,39 +5,51 @@ const mail = require('../service/mail/index')
 const conf = require('../conf/conf')
 const multer = require('multer')
 const format = require('../utils/format')
+const filter = require('../filter/filter')
 
 const upload = multer({dest: 'upload/'});
+let data = {name: '陈琪', address: 'chen_qi@kedacom.com'}
 
+
+let id = 0
 /* GET home page. */
-// 配置页预留
+// 操作台
 router.get('/', function (req, res, next) {
     res.sendfile('public\\index.html')
 })
-
-router.post('/mail', function (req, res, next) {
+// 建立定时发送任务
+router.post('/v1/mail', function (req, res, next) {
     let data = req.body
-    format.formatOption(data)
-        .then((_) => {
-            let option = _.mailOptions
-            let attachments = _.attachments
-            let task = new mail(option,attachments)
-            task.send()
-        })
-        .then(
-            () => res.send(200)
-        )
-        .catch((err) => {
-                res.send(500)
-                console.log(err)
-            }
-        )
+    filter.mail(data) ?
+        format.formatOption(data)
+            .then((_) => {
+                let option = _.mailOptions
+                let attachments = _.attachments
+                let task = new mail(option, attachments)
+                task.send()
+            })
+            .then(
+                () => {
+                    id++
+                    res.send({id: id, status: 'success'})
+                }
+            )
+            .catch((err) => {
+                    let info = {}
+                    info.status = 'failed'
+                    info.error = err
+                    res.send(info)
+                    console.log(err)
+                }
+            )
+        : res.send({status: 'failed'})
 })
-
-router.get('/mail', function (req, res, next) {
+// TODO:数据持久化
+router.get('/v1/mail', function (req, res, next) {
 
 })
-
-router.post('/upload', upload.single('file'), function (req, res, next) {
+// 上传图片
+router.post('/v1/upload', upload.single('file'), function (req, res, next) {
     let file = req.file;
     console.log('文件类型：%s', file.mimetype);
     console.log('原始文件名：%s', file.originalname);
@@ -51,5 +63,6 @@ router.post('/upload', upload.single('file'), function (req, res, next) {
         size: file.size
     })
 })
+
 
 module.exports = router;

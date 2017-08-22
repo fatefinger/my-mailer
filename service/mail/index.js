@@ -16,8 +16,8 @@ const Auth = require('./auth')
 /**
  *
  * @param {Object} mailer
- * @param {Object} auth
  * @param {Array} attachments
+ * @param {Object} auth
  * @returns {{sendAll: (function()), send: (function())}}
  * @constructor create a new Mail instance
  */
@@ -100,7 +100,7 @@ const MailClass = function (mailer, attachments, auth={}) {
             }
         })
     }
-    // 还原
+    // 复原
     this.initForm = () => {
         Mailer.initAttachment()
         Mailer.initHtml(this.templateSaved)

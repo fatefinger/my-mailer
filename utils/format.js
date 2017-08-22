@@ -11,9 +11,11 @@ const formatOption = function (obj) {
         }
         let mailAddress = `"${obj.name}"<${obj.address}>`
         option.mailOptions.to = mailAddress
-        while (obj.images.length > 0){
-            option.attachments.push(obj.images[0].path)
-            obj.images.shift()
+        if (obj.images) {
+            while (obj.images.length > 0) {
+                option.attachments.push(obj.images[0].path)
+                obj.images.shift()
+            }
         }
         resolve(option)
     })
