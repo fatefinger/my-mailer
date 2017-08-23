@@ -35,14 +35,11 @@ router.post('/v1/mail', function (req, res, next) {
                 }
             )
             .catch((err) => {
-                    let info = {}
-                    info.status = 'failed'
-                    info.error = err
-                    res.send(info)
+                    res.status(405).send({status: 'failed'})
                     console.log(err)
                 }
             )
-        : res.send({status: 'failed'})
+        : res.status(405).send({status: 'failed'})
 })
 // TODO:数据持久化
 router.get('/v1/mail', function (req, res, next) {
