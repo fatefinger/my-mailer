@@ -7,8 +7,10 @@ const formatOption = function (obj) {
             mailOptions:{
                 to: '',
             },
-            attachments: []
+            attachments: [],
+            time: {}
         }
+        option.time = timeFormat(obj.time)
         let mailAddress = `"${obj.name}"<${obj.address}>`
         option.mailOptions.to = mailAddress
         if (obj.images) {
@@ -21,6 +23,17 @@ const formatOption = function (obj) {
     })
 }
 
+const timeFormat = function (date) {
+    let time = new Date(Date.parse(date))
+    let hour = time.getHours()
+    let minute = time.getMinutes()
+    let second = time.getSeconds()
+    let result = {}
+    result['hour'] = hour
+    result['minute'] = minute
+    result['second'] = second
+    return result
+}
 module.exports = {
-    formatOption: formatOption
+    formatOption: formatOption,
 }

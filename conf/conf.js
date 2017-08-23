@@ -1,6 +1,7 @@
 //邮件发送时间
 const sendSec = 20 // 每分钟的第20秒 测试用
-const sendHour = 5 // 每日凌晨五点
+const sendHour = 0 // 每日凌晨五点
+const sendMinute = 0 // 每小时的第0分
 // 邮件发送信息
 const smtpHost = 'smtp.kedacom.com' // SMTP服务器
 const ssl = false // 非SSL方式发送
@@ -17,6 +18,7 @@ const test = 'test' //是否为测试模式
 module.exports = {
     SECOND_TO_SEND: sendSec,
     HOUR_TO_SEND: sendHour,
+    MINUTE_TO_SEND: sendMinute,
     SMTP_HOST: smtpHost,
     SSL_STATE: ssl,
     AUTH_USER: user,

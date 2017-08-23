@@ -18,10 +18,11 @@ const Auth = require('./auth')
  * @param {Object} mailer
  * @param {Array} attachments
  * @param {Object} auth
+ * @param {Object} time
  * @returns {{sendAll: (function()), send: (function())}}
  * @constructor create a new Mail instance
  */
-const MailClass = function (mailer, attachments, auth={}) {
+const MailClass = function (mailer, attachments, time, auth={}) {
     this.options = Object.assign({}, {
         from: conf.MAIL_FROM,
         to: conf.MAIL_TO,
@@ -41,6 +42,7 @@ const MailClass = function (mailer, attachments, auth={}) {
         }
     }, auth)
     this.attachments = attachments || []
+    this.time = time || {}
     // 图片附件列表
     this.fileList = []
     this.Mailer = Mailer.init(this.options)
@@ -106,6 +108,14 @@ const MailClass = function (mailer, attachments, auth={}) {
         Mailer.initHtml(this.templateSaved)
         console.log(this.options)
     }
+//    设定发送时间
+    this.setTime = (obj) => {
+        const rule = new schedule.RecurrenceRule()
+        obj.hour?rule.hour = obj.hour:rule.hour = conf.HOUR_TO_SEND
+        obj.minute?rule.minute = obj.minute:rule.minute = conf.MINUTE_TO_SEND
+        obj.second?rule.second = obj.second:rule.second = conf.SECOND_TO_SEND
+        return rule
+    }
 }
 /**
  * mail send
@@ -113,8 +123,7 @@ const MailClass = function (mailer, attachments, auth={}) {
  * @public
  */
 MailClass.prototype.send = function () {
-    const rule = new schedule.RecurrenceRule()
-    conf.MODE === 'test' ? (rule.second = conf.SECOND_TO_SEND) : (rule.hour = conf.HOUR_TO_SEND)
+    const rule = this.setTime(this.time)
     schedule.scheduleJob(rule, () => {
         this.saveTemplate()
             .then(() => Mailer.attachments())
