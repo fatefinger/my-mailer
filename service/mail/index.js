@@ -17,9 +17,9 @@ const Auth = require('./auth')
  *
  * @param {Object} mailer
  * @param {Array} attachments
- * @param {Object} auth
  * @param {Object} time
- * @returns {{sendAll: (function()), send: (function())}}
+ * @param {Object} auth
+ * @returns {{ create: (function())}}
  * @constructor create a new Mail instance
  */
 const MailClass = function (mailer, attachments, time, auth={}) {
@@ -116,27 +116,31 @@ const MailClass = function (mailer, attachments, time, auth={}) {
         obj.second?rule.second = obj.second:rule.second = conf.SECOND_TO_SEND
         return rule
     }
+//    发送邮件
+    this.send = function () {
+        const rule = this.setTime(this.time)
+        schedule.scheduleJob(rule, () => {
+            this.saveTemplate()
+                .then(() => Mailer.attachments())
+                .then(_ => this.setFileList(_))
+                .then(_ => this.insertImage(_))
+                .then(() => this.sendMail())
+                .then(() => this.initForm())
+                .then(() => {
+                    console.log('邮件发送成功')
+                }, (err) => {
+                    console.log('邮件发送失败' + err)
+                })
+        })
+    }
 }
 /**
  * mail send
  * this method set a new instance for send mail
  * @public
  */
-MailClass.prototype.send = function () {
-    const rule = this.setTime(this.time)
-    schedule.scheduleJob(rule, () => {
-        this.saveTemplate()
-            .then(() => Mailer.attachments())
-            .then(_ => this.setFileList(_))
-            .then(_ => this.insertImage(_))
-            .then(() => this.sendMail())
-            .then(() => this.initForm())
-            .then(() => {
-                console.log('邮件发送成功')
-            }, (err) => {
-                console.log('邮件发送失败' + err)
-            })
-    })
+MailClass.prototype.create = function () {
+    return this.send
 }
 
 

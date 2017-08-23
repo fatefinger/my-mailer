@@ -27,7 +27,7 @@ router.post('/v1/mail', function (req, res, next) {
                 let attachments = _.attachments
                 let time = _.time
                 let task = new mail(option, attachments, time)
-                task.send()
+                task.create()
             })
             .then(
                 () => {
