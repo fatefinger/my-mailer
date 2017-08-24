@@ -22,7 +22,7 @@ const Auth = require('./auth')
  * @returns {{ create: (function())}}
  * @constructor create a new Mail instance
  */
-const MailClass = function (mailer, attachments, time, auth={}) {
+const MailClass = function (mailer, attachments, time, auth = {}) {
     this.options = Object.assign({}, {
         from: conf.MAIL_FROM,
         to: conf.MAIL_TO,
@@ -111,36 +111,33 @@ const MailClass = function (mailer, attachments, time, auth={}) {
 //    设定发送时间
     this.setTime = (obj) => {
         const rule = new schedule.RecurrenceRule()
-        obj.hour?rule.hour = obj.hour:rule.hour = conf.HOUR_TO_SEND
-        obj.minute?rule.minute = obj.minute:rule.minute = conf.MINUTE_TO_SEND
-        obj.second?rule.second = obj.second:rule.second = conf.SECOND_TO_SEND
+        obj.hour ? rule.hour = obj.hour : rule.hour = conf.HOUR_TO_SEND
+        obj.minute ? rule.minute = obj.minute : rule.minute = conf.MINUTE_TO_SEND
+        obj.second ? rule.second = obj.second : rule.second = conf.SECOND_TO_SEND
         return rule
     }
 //    发送邮件
-    this.send = function () {
-        const rule = this.setTime(this.time)
-        schedule.scheduleJob(rule, () => {
-            this.saveTemplate()
-                .then(() => Mailer.attachments())
-                .then(_ => this.setFileList(_))
-                .then(_ => this.insertImage(_))
-                .then(() => this.sendMail())
-                .then(() => this.initForm())
-                .then(() => {
-                    console.log('邮件发送成功')
-                }, (err) => {
-                    console.log('邮件发送失败' + err)
-                })
-        })
-    }
 }
 /**
  * mail send
  * this method set a new instance for send mail
  * @public
  */
-MailClass.prototype.create = function () {
-    return this.send
+MailClass.prototype.send = function () {
+    const rule = this.setTime(this.time)
+    schedule.scheduleJob(rule, () => {
+        this.saveTemplate()
+            .then(() => Mailer.attachments())
+            .then(_ => this.setFileList(_))
+            .then(_ => this.insertImage(_))
+            .then(() => this.sendMail())
+            .then(() => this.initForm())
+            .then(() => {
+                console.log('邮件发送成功')
+            }, (err) => {
+                console.log('邮件发送失败' + err)
+            })
+    })
 }
 
 
