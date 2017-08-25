@@ -10,7 +10,8 @@ const routes = require('./routes/index')
 const users = require('./routes/users')
 
 const app = express()
-const init = require('./utils/init')
+const mongoose = require('mongoose')
+mongoose.connect('mongodb://localhost:27017/my-mailer')
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))

@@ -1,6 +1,6 @@
-# nodejs_nodemailer
+# my-mailer
+可配置的邮件定时发送服务器
 
-写给啸豪的邮件定时发送工具
 # 准备
 去nodejs官网下载安装nodejs 6.XX.XX版本即可，安装后
 

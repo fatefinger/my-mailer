@@ -6,8 +6,7 @@ const conf = require('../conf/conf')
 const multer = require('multer')
 const format = require('../utils/format')
 const filter = require('../filter/filter')
-const recipient = require('../model/model/recipientModel')
-
+const recipient = require('../controller/recipient-controller')
 const upload = multer({dest: 'upload/'});
 let data = {name: '陈琪', address: 'chen_qi@kedacom.com'}
 
@@ -21,8 +20,7 @@ router.get('/', function (req, res, next) {
 // 建立定时发送任务
 router.post('/v1/mail', function (req, res, next) {
     let data = req.body
-    let entity = recipient(data)
-    entity.save()
+    recipient.add(data)
     filter.mail(data) ?
         format.formatOption(data)
             .then((_) => {
@@ -36,6 +34,8 @@ router.post('/v1/mail', function (req, res, next) {
                 () => {
                     id++
                     res.send({id: id, status: 'success'})
+                    let list = recipient.list()
+                    console.log(list)
                 }
             )
             .catch((err) => {
