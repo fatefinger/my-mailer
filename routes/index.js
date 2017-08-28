@@ -34,8 +34,6 @@ router.post('/v1/mail', function (req, res, next) {
                 () => {
                     id++
                     res.send({id: id, status: 'success'})
-                    let list = recipient.list()
-                    console.log(list)
                 }
             )
             .catch((err) => {
@@ -47,7 +45,11 @@ router.post('/v1/mail', function (req, res, next) {
 })
 // TODO:数据持久化
 router.get('/v1/mail', function (req, res, next) {
-
+    console.log('begin')
+    let info = []
+    Promise.resolve(recipient.list(function (val) {
+        info.push(val)
+    }), info)
 })
 // 上传图片
 router.post('/v1/upload', upload.single('file'), function (req, res, next) {

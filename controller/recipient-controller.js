@@ -2,18 +2,18 @@ const Recipient = require('../model/models/recipientModel')
 const _ = require('underscore')
 
 module.exports = {
-    list: () => {
+    list: (callback, arr = []) => {
         Recipient.fetch(
             (err, recipients) => {
                 let resultRecipients = _.map(recipients, function (recipient) {
                         if (err) {
                             console.log(err)
                         } else {
-
+                            callback(recipient)
+                            arr.push(recipient)
                         }
                     }
                 )
-                return resultRecipients
             })
     },
     add: (recipientOptions, next) => {
