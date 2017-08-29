@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+mongoose.Promise = global.Promise
 
 const RecipientSchema= new mongoose.Schema({
     name:{type: String,required: true},   //define an attribution name of typing String
@@ -7,8 +8,10 @@ const RecipientSchema= new mongoose.Schema({
     images:[{file:String,path:String,url:String}]
 }, {safe: true})
 
+
 RecipientSchema.statics = {
     fetch: function (cb) {
+        console.log('fetch begin')
         return this.find({})
             .sort('meta.createAt')
             .exec(cb)

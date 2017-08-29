@@ -43,13 +43,16 @@ router.post('/v1/mail', function (req, res, next) {
             )
         : res.status(405).send({status: 'failed'})
 })
-// TODO:数据持久化
+// 获取任务列表
 router.get('/v1/mail', function (req, res, next) {
-    console.log('begin')
-    let info = []
-    Promise.resolve(recipient.list(function (val) {
-        info.push(val)
-    }), info)
+    let result = recipient.list((err, recipients) => {
+        if (err) {
+            console.log(err)
+            res.status(500).send(err)
+        } else {
+            res.send(recipients)
+        }
+    })
 })
 // 上传图片
 router.post('/v1/upload', upload.single('file'), function (req, res, next) {
