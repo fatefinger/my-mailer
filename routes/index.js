@@ -17,6 +17,7 @@ let id = 0
 router.get('/', function (req, res, next) {
     res.sendfile('public\\index.html')
 })
+
 // 建立定时发送任务
 router.post('/v1/mail', function (req, res, next) {
     let data = req.body
