@@ -8,7 +8,6 @@ const format = require('../utils/format')
 const filter = require('../filter/filter')
 const recipient = require('../controller/recipient-controller')
 const upload = multer({dest: 'upload/'});
-let data = {name: '陈琪', address: 'chen_qi@kedacom.com'}
 
 
 let id = 0
